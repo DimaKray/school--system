@@ -1,0 +1,142 @@
+.hw-tabs{
+    display:flex;
+    gap:28px;
+    border-bottom:1px solid #ececf3;
+    margin-bottom:22px;
+}
+
+.hw-tab{
+    background:none;
+    border:none;
+    padding:0 0 14px 0;
+    font-size:14px;
+    font-weight:600;
+    color:#999;
+    cursor:pointer;
+    position:relative;
+}
+
+.hw-tab.active{
+    color:#7367F0;
+}
+
+.hw-tab.active::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:-1px;
+    height:2px;
+    background:#7367F0;
+    border-radius:2px;
+}
+
+.hw-list{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.hw-card{
+    background:white;
+    border-radius:16px;
+    padding:16px 20px;
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
+
+.hw-card-icon{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    flex-shrink:0;
+}
+
+.hw-card-main{
+    flex:1.5;
+    min-width:0;
+}
+
+.hw-card-title{
+    font-size:14px;
+    font-weight:700;
+    color:#2b2b2b;
+}
+
+.hw-card-sub{
+    font-size:12px;
+    color:#8b8b95;
+    margin-top:2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.hw-card-class{
+    flex:0.6;
+    font-size:13px;
+    font-weight:600;
+    color:#444;
+    text-align:center;
+}
+
+.hw-card-col{
+    flex:1;
+}
+
+.hw-col-label{
+    font-size:11px;
+    color:#b5b5bd;
+    margin-bottom:3px;
+}
+
+.hw-col-value{
+    font-size:13px;
+    font-weight:700;
+    color:#2b2b2b;
+    white-space:nowrap;
+}
+
+.hw-progress-col{
+    max-width:120px;
+}
+
+.hw-progress-track{
+    width:100%;
+    height:5px;
+    background:#f0f0f5;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:6px;
+}
+
+.hw-progress-fill{
+    height:100%;
+    border-radius:10px;
+    transition:width .3s;
+}
+
+.hw-card-actions{
+    display:flex;
+    gap:8px;
+    flex-shrink:0;
+}
+
+@media (max-width:900px){
+
+    .hw-card{
+        flex-wrap:wrap;
+    }
+
+    .hw-card-class,
+    .hw-card-col{
+        flex:1 1 45%;
+    }
+
+}

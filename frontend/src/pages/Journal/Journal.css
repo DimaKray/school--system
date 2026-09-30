@@ -1,0 +1,175 @@
+.jr-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    gap:14px;
+}
+
+.jr-header h1{
+    font-size:28px;
+    font-weight:700;
+}
+
+.jr-header-actions{
+    display:flex;
+    gap:10px;
+}
+
+.jr-filters{
+    display:flex;
+    gap:14px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.jr-filter-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:170px;
+}
+
+.jr-filter-group label{
+    font-size:12px;
+    color:#999;
+    font-weight:600;
+}
+
+.jr-filter-group select{
+    height:42px;
+    border:1px solid #e2e2ea;
+    border-radius:10px;
+    padding:0 14px;
+    outline:none;
+    font-size:14px;
+    background:white;
+    font-family:inherit;
+    font-weight:600;
+    color:#2b2b2b;
+}
+
+.jr-filter-group select:focus{
+    border:1px solid #7367F0;
+}
+
+.jr-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:820px;
+}
+
+.jr-table th{
+    text-align:center;
+    font-size:12px;
+    color:#999;
+    font-weight:600;
+    padding:16px 10px;
+    border-bottom:1px solid #f0f0f5;
+    white-space:nowrap;
+}
+
+.jr-student-col{
+    text-align:left !important;
+    min-width:200px;
+}
+
+.jr-date-col{
+    min-width:52px;
+}
+
+.jr-date-weekday{
+    color:#c5c5cf;
+    font-weight:500;
+    margin-top:2px;
+    text-transform:none;
+}
+
+.jr-table td{
+    padding:10px;
+    border-bottom:1px solid #f5f5f9;
+    text-align:center;
+    vertical-align:middle;
+}
+
+.jr-student-cell{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-align:left !important;
+    font-size:14px;
+    font-weight:600;
+    color:#2b2b2b;
+    white-space:nowrap;
+}
+
+.jr-avatar{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:#7367F0;
+    color:white;
+    font-size:12px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+
+.jr-grade-col{
+    padding:6px !important;
+}
+
+.jr-grade-pill{
+    width:34px;
+    height:30px;
+    border:none;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.jr-grade-pill:hover{
+    transform:scale(1.08);
+}
+
+.jr-avg-cell{
+    font-weight:700;
+    color:#2b2b2b;
+    font-size:14px;
+}
+
+.jr-att-cell{
+    min-width:100px;
+}
+
+.jr-att-percent{
+    font-size:13px;
+    font-weight:700;
+    color:#2b2b2b;
+    margin-bottom:6px;
+}
+
+.jr-att-bar-track{
+    width:100%;
+    height:5px;
+    background:#f0f0f5;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.jr-att-bar-fill{
+    height:100%;
+    border-radius:10px;
+    transition:width .3s;
+}
+
+@media (max-width:768px){
+    .jr-filters{
+        flex-direction:column;
+    }
+}

@@ -1,0 +1,174 @@
+.an-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    gap:14px;
+}
+
+.an-header h1{
+    font-size:28px;
+    font-weight:700;
+}
+
+.an-month-select{
+    height:42px;
+    border:1px solid #e2e2ea;
+    border-radius:10px;
+    padding:0 14px;
+    outline:none;
+    font-size:14px;
+    background:white;
+    font-family:inherit;
+    font-weight:600;
+    color:#2b2b2b;
+}
+
+.an-month-select:focus{
+    border:1px solid #7367F0;
+}
+
+.an-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:18px;
+    margin-bottom:18px;
+}
+
+.an-card{
+    background:white;
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 5px 18px rgba(0,0,0,.06);
+    display:flex;
+    flex-direction:column;
+}
+
+.an-card h2{
+    font-size:14px;
+    font-weight:700;
+    color:#2b2b2b;
+    margin-bottom:10px;
+}
+
+.an-value{
+    font-size:28px;
+    font-weight:700;
+    color:#2b2b2b;
+}
+
+.an-delta{
+    font-size:12px;
+    font-weight:700;
+    margin-top:2px;
+    margin-bottom:8px;
+}
+
+.an-delta.up{
+    color:#2fb380;
+}
+
+.an-delta.down{
+    color:#e34848;
+}
+
+.an-delta span{
+    display:block;
+    font-size:11px;
+    font-weight:500;
+    color:#b5b5bd;
+    margin-top:2px;
+}
+
+.an-donut-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-top:6px;
+}
+
+.an-legend{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    flex:1;
+}
+
+.an-legend-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:#444;
+    font-weight:600;
+}
+
+.an-legend-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    flex-shrink:0;
+}
+
+.an-legend-value{
+    margin-left:auto;
+    color:#2b2b2b;
+    font-weight:700;
+}
+
+.an-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:4px;
+    flex:1;
+}
+
+.an-list-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.an-rank{
+    width:16px;
+    font-size:13px;
+    font-weight:700;
+    color:#b5b5bd;
+}
+
+.an-warning-icon{
+    color:#e0a020;
+    font-size:14px;
+    flex-shrink:0;
+}
+
+.an-name{
+    flex:1;
+    font-size:13px;
+    font-weight:600;
+    color:#2b2b2b;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.an-score{
+    font-size:13px;
+    font-weight:700;
+}
+
+.an-score.good{
+    color:#7367F0;
+}
+
+.an-score.bad{
+    color:#e34848;
+}
+
+@media (max-width:1100px){
+    .an-grid{
+        grid-template-columns:1fr;
+    }
+}
