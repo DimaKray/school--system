@@ -4,6 +4,8 @@ const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
+const validate = require("../middlewares/validate");
+const v = require("../validators");
 
 const {
     getAllSchedule,
@@ -14,10 +16,10 @@ const {
 
 router.get("/", authMiddleware, getAllSchedule);
 
-router.post("/", authMiddleware, roleMiddleware("admin"), createSchedule);
+router.post("/", authMiddleware, roleMiddleware("admin"), validate(v.scheduleBody), createSchedule);
 
-router.put("/:id", authMiddleware, roleMiddleware("admin"), updateSchedule);
+router.put("/:id", authMiddleware, roleMiddleware("admin"), validate([...v.routeId, ...v.scheduleBody]), updateSchedule);
 
-router.delete("/:id", authMiddleware, roleMiddleware("admin"), deleteSchedule);
+router.delete("/:id", authMiddleware, roleMiddleware("admin"), validate(v.routeId), deleteSchedule);
 
 module.exports = router;

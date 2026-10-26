@@ -1,7 +1,9 @@
+const { getScope, getTeacherId } = require("../utils/access");
 const studentModel = require("../models/studentModel");
 
-const getAllStudents = async () => {
-    return await studentModel.getAllStudents();
+const getAllStudents = async (user) => {
+    const scope = await getScope(user);
+    return studentModel.getAllStudents(scope ? scope.studentIds : null);
 };
 
 const createStudent = async (student) => {

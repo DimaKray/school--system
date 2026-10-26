@@ -22,6 +22,7 @@ import {
     deleteClass
 } from "../../services/classService";
 import { getStudents } from "../../services/studentService";
+import { getTeachers } from "../../services/teacherService";
 import { getGrades } from "../../services/gradeService";
 import { getClassColor } from "../../utils/classColors";
 import Avatar from "../../components/Avatar";
@@ -31,7 +32,8 @@ import "./Classes.css";
 
 const emptyForm = {
     name: "",
-    school_year: ""
+    school_year: "",
+    teacher_id: ""
 };
 
 function Classes() {
@@ -39,6 +41,7 @@ function Classes() {
     const [classes, setClasses] = useState([]);
     const [students, setStudents] = useState([]);
     const [grades, setGrades] = useState([]);
+    const [teachers, setTeachers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [showModal, setShowModal] = useState(false);
@@ -54,11 +57,14 @@ function Classes() {
 
         try {
 
-            const [classesRes, studentsRes, gradesRes] = await Promise.all([
+            const [classesRes, studentsRes, gradesRes, teachersRes] = await Promise.all([
                 getClasses(),
                 getStudents(),
-                getGrades()
+                getGrades(),
+                getTeachers()
             ]);
+
+            setTeachers(teachersRes.data.teachers || []);
 
             setClasses(classesRes.data.classes || []);
             setStudents(studentsRes.data.students || []);
@@ -131,7 +137,8 @@ function Classes() {
 
         setForm({
             name: item.name || "",
-            school_year: item.school_year || ""
+            school_year: item.school_year || "",
+            teacher_id: item.teacher_id || ""
         });
 
         setShowModal(true);
@@ -162,12 +169,18 @@ function Classes() {
 
             if (editingId) {
 
-                await updateClass(editingId, form);
+                await updateClass(editingId, {
+                    ...form,
+                    teacher_id: form.teacher_id ? Number(form.teacher_id) : null
+                });
                 toast.success("Клас оновлено");
 
             } else {
 
-                await createClass(form);
+                await createClass({
+                    ...form,
+                    teacher_id: form.teacher_id ? Number(form.teacher_id) : null
+                });
                 toast.success("Клас додано");
 
             }
@@ -307,6 +320,9 @@ function Classes() {
 
                             <div className="cls-year">
                                 <FaCalendarAlt /> {c.school_year}
+                                {c.teacher_last_name && (
+                                    <span> · Кл. керівник: {c.teacher_first_name} {c.teacher_last_name}</span>
+                                )}
                             </div>
 
                             <div className="cls-card-bottom">
@@ -399,6 +415,9 @@ function Classes() {
                                 </span>
                                 <div className="dp-header-sub" style={{ marginTop: 8 }}>
                                     Навчальний рік: {activeClass.school_year}
+                                    {activeClass.teacher_last_name && (
+                                        <> · Класний керівник: {activeClass.teacher_first_name} {activeClass.teacher_last_name}</>
+                                    )}
                                 </div>
                             </div>
 
@@ -514,6 +533,22 @@ function Classes() {
                                     onChange={handleChange}
                                     placeholder="напр. 2025/2026"
                                 />
+                            </div>
+
+                            <div className="dp-form-group">
+                                <label>Класний керівник</label>
+                                <select
+                                    name="teacher_id"
+                                    value={form.teacher_id}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">Не призначено</option>
+                                    {teachers.map((t) => (
+                                        <option key={t.id} value={t.id}>
+                                            {t.first_name} {t.last_name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="dp-modal-actions">

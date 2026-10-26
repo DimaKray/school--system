@@ -1,15 +1,30 @@
+const { getScope, getTeacherId } = require("../utils/access");
 const homeworkModel = require("../models/homeworkModel");
 
-const getAllHomework = async () => {
+// Вчитель може задавати завдання лише від власного імені
+const resolveTeacherId = async (data, user) => {
 
-    return await homeworkModel.getAllHomework();
+    if (user && user.role === "teacher") {
+        return await getTeacherId(user.id);
+    }
+
+    return data.teacher_id;
 
 };
 
-const createHomework = async (homework) => {
+const getAllHomework = async (user) => {
+    const scope = await getScope(user);
+
+    return homeworkModel.getAllHomework(scope ? scope.classIds : null);
+
+};
+
+const createHomework = async (homework, user) => {
+
+    const teacherId = await resolveTeacherId(homework, user);
 
     return await homeworkModel.createHomework(
-        homework.teacher_id,
+        teacherId,
         homework.class_id,
         homework.subject_id,
         homework.title,
@@ -19,11 +34,13 @@ const createHomework = async (homework) => {
 
 };
 
-const updateHomework = async (id, homework) => {
+const updateHomework = async (id, homework, user) => {
+
+    const teacherId = await resolveTeacherId(homework, user);
 
     return await homeworkModel.updateHomework(
         id,
-        homework.teacher_id,
+        teacherId,
         homework.class_id,
         homework.subject_id,
         homework.title,

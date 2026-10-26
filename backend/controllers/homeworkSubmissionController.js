@@ -1,3 +1,4 @@
+const { sendError } = require("../utils/sendError");
 const homeworkSubmissionService = require("../services/homeworkSubmissionService");
 
 const getAllHomeworkSubmissions = async (req, res) => {
@@ -5,7 +6,7 @@ const getAllHomeworkSubmissions = async (req, res) => {
     try {
 
         const submissions =
-            await homeworkSubmissionService.getAllHomeworkSubmissions();
+            await homeworkSubmissionService.getAllHomeworkSubmissions(req.user);
 
         res.json({
             success: true,
@@ -14,12 +15,7 @@ const getAllHomeworkSubmissions = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -30,7 +26,7 @@ const createHomeworkSubmission = async (req, res) => {
     try {
 
         const id =
-            await homeworkSubmissionService.createHomeworkSubmission(req.body);
+            await homeworkSubmissionService.createHomeworkSubmission(req.body, req.user);
 
         res.status(201).json({
             success: true,
@@ -39,12 +35,7 @@ const createHomeworkSubmission = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -56,7 +47,8 @@ const updateHomeworkSubmission = async (req, res) => {
 
         await homeworkSubmissionService.updateHomeworkSubmission(
             req.params.id,
-            req.body
+            req.body,
+            req.user
         );
 
         res.json({
@@ -66,12 +58,7 @@ const updateHomeworkSubmission = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -83,7 +70,8 @@ const deleteHomeworkSubmission = async (req, res) => {
 
         const deleted =
             await homeworkSubmissionService.deleteHomeworkSubmission(
-                req.params.id
+                req.params.id,
+                req.user
             );
 
         if (!deleted) {
@@ -102,12 +90,7 @@ const deleteHomeworkSubmission = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 

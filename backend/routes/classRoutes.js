@@ -4,6 +4,8 @@ const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
+const validate = require("../middlewares/validate");
+const v = require("../validators");
 
 const {
     getAllClasses,
@@ -14,10 +16,10 @@ const {
 
 router.get("/", authMiddleware, getAllClasses);
 
-router.post("/", authMiddleware, roleMiddleware("admin"), createClass);
+router.post("/", authMiddleware, roleMiddleware("admin"), validate(v.classBody), createClass);
 
-router.put("/:id", authMiddleware, roleMiddleware("admin"), updateClass);
+router.put("/:id", authMiddleware, roleMiddleware("admin"), validate([...v.routeId, ...v.classBody]), updateClass);
 
-router.delete("/:id", authMiddleware, roleMiddleware("admin"), deleteClass);
+router.delete("/:id", authMiddleware, roleMiddleware("admin"), validate(v.routeId), deleteClass);
 
 module.exports = router;

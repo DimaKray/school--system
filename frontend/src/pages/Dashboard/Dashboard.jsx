@@ -12,6 +12,7 @@ import {
 import { toast } from "react-toastify";
 
 import { AuthContext } from "../../context/AuthContext";
+import { canManageAcademics } from "../../utils/permissions";
 
 import { getStudents } from "../../services/studentService";
 import { getTeachers } from "../../services/teacherService";
@@ -434,16 +435,18 @@ function Dashboard() {
 
                 <div className="dash-actions">
 
-                    <button
-                        className="dash-action-btn"
-                        onClick={() => navigate("/journal")}
-                    >
-                        <div className="dash-action-icon purple"><FaPlus /></div>
-                        <div>
-                            <div className="dash-action-title">Додати оцінку</div>
-                            <div className="dash-action-sub">Швидке внесення оцінки</div>
-                        </div>
-                    </button>
+                    {canManageAcademics(user) && (
+                        <button
+                            className="dash-action-btn"
+                            onClick={() => navigate("/journal")}
+                        >
+                            <div className="dash-action-icon purple"><FaPlus /></div>
+                            <div>
+                                <div className="dash-action-title">Додати оцінку</div>
+                                <div className="dash-action-sub">Швидке внесення оцінки</div>
+                            </div>
+                        </button>
+                    )}
 
                     <button
                         className="dash-action-btn"
@@ -451,8 +454,12 @@ function Dashboard() {
                     >
                         <div className="dash-action-icon yellow"><FaCalendarPlus /></div>
                         <div>
-                            <div className="dash-action-title">Створити завдання</div>
-                            <div className="dash-action-sub">Додати домашнє завдання</div>
+                            <div className="dash-action-title">
+                                {canManageAcademics(user) ? "Створити завдання" : "Домашні завдання"}
+                            </div>
+                            <div className="dash-action-sub">
+                                {canManageAcademics(user) ? "Додати домашнє завдання" : "Переглянути та здати"}
+                            </div>
                         </div>
                     </button>
 

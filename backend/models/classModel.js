@@ -4,45 +4,52 @@ const getAllClasses = async () => {
 
     const result = await pool.query(`
         SELECT
-            id,
-            name,
-            school_year
+            classes.id,
+            classes.name,
+            classes.school_year,
+            classes.teacher_id,
+            users.first_name AS teacher_first_name,
+            users.last_name AS teacher_last_name
         FROM classes
-        ORDER BY name
+        LEFT JOIN teachers ON classes.teacher_id = teachers.id
+        LEFT JOIN users ON teachers.user_id = users.id
+        ORDER BY classes.name
     `);
 
     return result.rows;
 
 };
 
-const createClass = async (name, school_year) => {
+const createClass = async (name, school_year, teacher_id) => {
 
     const result = await pool.query(
         `
-        INSERT INTO classes (name, school_year)
-        VALUES ($1, $2)
+        INSERT INTO classes (name, school_year, teacher_id)
+        VALUES ($1, $2, $3)
         RETURNING id
         `,
-        [name, school_year]
+        [name, school_year, teacher_id || null]
     );
 
     return result.rows[0].id;
 
 };
 
-const updateClass = async (id, name, school_year) => {
+const updateClass = async (id, name, school_year, teacher_id) => {
 
     await pool.query(
         `
         UPDATE classes
         SET
             name = $1,
-            school_year = $2
-        WHERE id = $3
+            school_year = $2,
+            teacher_id = $3
+        WHERE id = $4
         `,
         [
             name,
             school_year,
+            teacher_id || null,
             id
         ]
     );

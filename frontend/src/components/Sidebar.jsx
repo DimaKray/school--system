@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { canManageStructure } from "../utils/permissions";
 
 import "./Sidebar.css";
 import {
@@ -16,6 +15,8 @@ import {
   FaCog,
   FaSignOutAlt,
   FaGraduationCap,
+  FaFileAlt,
+  FaUserFriends,
 } from "react-icons/fa";
 
 import plant from "../assets/slidebar_person.png";
@@ -31,6 +32,8 @@ const menu = [
   { title: "Класи", icon: <FaSchool />, path: "/classes", roles: ["admin"] },
   { title: "Предмети", icon: <FaBook />, path: "/subjects", roles: ["admin", "teacher"] },
   { title: "Аналітика", icon: <FaChartBar />, path: "/analytics", roles: ["admin", "teacher"] },
+  { title: "Звіти", icon: <FaFileAlt />, path: "/reports", roles: ["admin", "teacher"] },
+  { title: "Батьки", icon: <FaUserFriends />, path: "/parents", roles: ["admin"] },
   { title: "Налаштування", icon: <FaCog />, path: "/settings", roles: ["admin", "teacher", "student", "parent"] },
 ];
 

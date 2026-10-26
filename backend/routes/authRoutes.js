@@ -2,23 +2,20 @@ const express = require("express");
 
 const router = express.Router();
 
+const authMiddleware = require("../middlewares/authMiddleware");
+const validate = require("../middlewares/validate");
+const v = require("../validators");
+
 const {
     register,
-    login
+    login,
+    profile
 } = require("../controllers/authController");
 
-router.post("/register", register);
-router.post("/login", login);
+router.post("/register", validate(v.register), register);
+
+router.post("/login", validate(v.login), login);
+
+router.get("/profile", authMiddleware, profile);
 
 module.exports = router;
-
-const authMiddleware = require("../middlewares/authMiddleware");
-
-router.get("/profile", authMiddleware, (req, res) => {
-
-    res.json({
-        success: true,
-        user: req.user
-    });
-
-});

@@ -15,7 +15,7 @@ function Register() {
         last_name: "",
         email: "",
         password: "",
-        role: "admin"
+        role: "student"
     });
 
     const [loading, setLoading] = useState(false);
@@ -37,6 +37,11 @@ function Register() {
 
         if (!first_name || !last_name || !email || !password || !role) {
             toast.error("Заповніть усі поля");
+            return;
+        }
+
+        if (password.length < 6) {
+            toast.error("Пароль має містити щонайменше 6 символів");
             return;
         }
 
@@ -151,7 +156,6 @@ function Register() {
                             value={form.role}
                             onChange={handleChange}
                         >
-                            <option value="admin">Адміністратор</option>
                             <option value="teacher">Вчитель</option>
                             <option value="student">Учень</option>
                             <option value="parent">Батьки</option>

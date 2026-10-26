@@ -3,43 +3,38 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
-const upload = require("../config/multer");
+const roleMiddleware = require("../middlewares/roleMiddleware");
+const { photoUpload, homeworkUpload } = require("../config/multer");
 
-router.post(
-    "/photo",
-    authMiddleware,
-    (req, res) => {
+// Обробник завантаження одного файлу: повертає URL збереженого файлу
+const uploadSingle = (uploader, field, folder) => (req, res) => {
 
-        upload.single("photo")(req, res, (error) => {
+    uploader.single(field)(req, res, (error) => {
 
-            if (error) {
+        if (error) {
+            const message = error.code === "LIMIT_FILE_SIZE"
+                ? "Файл завеликий"
+                : error.message;
+            return res.status(400).json({ success: false, message });
+        }
 
-                return res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "Файл не завантажено" });
+        }
 
-            }
-
-            if (!req.file) {
-
-                return res.status(400).json({
-                    success: false,
-                    message: "Файл не завантажено"
-                });
-
-            }
-
-            const url = `/uploads/photos/${req.file.filename}`;
-
-            res.json({
-                success: true,
-                url
-            });
-
+        res.json({
+            success: true,
+            url: `/uploads/${folder}/${req.file.filename}`
         });
 
-    }
-);
+    });
+
+};
+
+// Фото користувачів завантажує адміністратор
+router.post("/photo", authMiddleware, roleMiddleware("admin"), uploadSingle(photoUpload, "photo", "photos"));
+
+// Файл виконаного домашнього завдання завантажує учень
+router.post("/homework", authMiddleware, roleMiddleware("student"), uploadSingle(homeworkUpload, "file", "homework"));
 
 module.exports = router;

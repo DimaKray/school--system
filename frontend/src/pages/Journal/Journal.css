@@ -173,3 +173,28 @@
         flex-direction:column;
     }
 }
+.jr-att-list{
+    max-height:360px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:10px;
+}
+
+.jr-att-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    font-size:14px;
+    padding:6px 0;
+    border-bottom:1px solid #f0f0f5;
+}
+
+.jr-att-row select{
+    padding:6px 10px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    font-size:13px;
+}

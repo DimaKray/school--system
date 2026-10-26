@@ -1,10 +1,11 @@
+const { sendError } = require("../utils/sendError");
 const attendanceService = require("../services/attendanceService");
 
 const getAllAttendance = async (req, res) => {
 
     try {
 
-        const attendance = await attendanceService.getAllAttendance();
+        const attendance = await attendanceService.getAllAttendance(req.user);
 
         res.json({
             success: true,
@@ -13,12 +14,7 @@ const getAllAttendance = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -28,7 +24,7 @@ const createAttendance = async (req, res) => {
 
     try {
 
-        const id = await attendanceService.createAttendance(req.body);
+        const id = await attendanceService.createAttendance(req.body, req.user);
 
         res.status(201).json({
             success: true,
@@ -37,12 +33,29 @@ const createAttendance = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        sendError(res, error);
 
-        res.status(500).json({
-            success: false,
-            message: error.message
+    }
+
+};
+
+const saveAttendanceBulk = async (req, res) => {
+
+    try {
+
+        const count = await attendanceService.saveAttendanceBulk(
+            req.body.lesson_date,
+            req.body.records
+        );
+
+        res.json({
+            success: true,
+            saved: count
         });
+
+    } catch (error) {
+
+        sendError(res, error);
 
     }
 
@@ -64,12 +77,7 @@ const updateAttendance = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -97,12 +105,7 @@ const deleteAttendance = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -110,6 +113,7 @@ const deleteAttendance = async (req, res) => {
 
 module.exports = {
     getAllAttendance,
+    saveAttendanceBulk,
     createAttendance,
     updateAttendance,
     deleteAttendance

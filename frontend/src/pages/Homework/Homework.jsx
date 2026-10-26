@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { FaPlus, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { FaPlus, FaTimes, FaEdit, FaTrash, FaUpload, FaInbox, FaPaperclip } from "react-icons/fa";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 
@@ -9,7 +9,15 @@ import {
     updateHomework,
     deleteHomework
 } from "../../services/homeworkService";
-import { getHomeworkSubmissions } from "../../services/homeworkSubmissionService";
+import {
+    getHomeworkSubmissions,
+    createHomeworkSubmission,
+    updateHomeworkSubmission
+} from "../../services/homeworkSubmissionService";
+import { uploadHomeworkFile } from "../../services/uploadService";
+import { AuthContext } from "../../context/AuthContext";
+import { canManageAcademics, isStudent } from "../../utils/permissions";
+import { getPhotoUrl } from "../../utils/photoUrl";
 import { getClasses } from "../../services/classService";
 import { getSubjects } from "../../services/subjectService";
 import { getTeachers } from "../../services/teacherService";
@@ -37,6 +45,19 @@ const emptyForm = {
 };
 
 function Homework() {
+
+    const { user } = useContext(AuthContext);
+    const canEdit = canManageAcademics(user);
+    const student = isStudent(user);
+
+    // Здача роботи учнем
+    const [submitFor, setSubmitFor] = useState(null);
+    const [submitFile, setSubmitFile] = useState(null);
+    const [submitComment, setSubmitComment] = useState("");
+
+    // Перегляд і оцінювання робіт вчителем
+    const [reviewFor, setReviewFor] = useState(null);
+    const [reviewGrades, setReviewGrades] = useState({});
 
     const [homework, setHomework] = useState([]);
     const [submissions, setSubmissions] = useState([]);
@@ -179,8 +200,11 @@ function Homework() {
 
         e.preventDefault();
 
+        // Вчителю поле «Вчитель» не потрібне — сервер підставляє його самого
+        const needTeacher = user?.role !== "teacher";
+
         if (
-            !form.teacher_id ||
+            (needTeacher && !form.teacher_id) ||
             !form.class_id ||
             !form.subject_id ||
             !form.title
@@ -194,7 +218,7 @@ function Homework() {
         try {
 
             const payload = {
-                teacher_id: Number(form.teacher_id),
+                teacher_id: form.teacher_id ? Number(form.teacher_id) : null,
                 class_id: Number(form.class_id),
                 subject_id: Number(form.subject_id),
                 title: form.title,
@@ -233,6 +257,102 @@ function Homework() {
 
     };
 
+    const mySubmission = (hw) =>
+        submissions.find((s) => String(s.homework_id) === String(hw.id));
+
+    const openSubmit = (hw) => {
+        setSubmitFor(hw);
+        setSubmitFile(null);
+        setSubmitComment(mySubmission(hw)?.comment || "");
+    };
+
+    const handleSubmitWork = async (e) => {
+
+        e.preventDefault();
+
+        const existing = mySubmission(submitFor);
+
+        if (!submitFile && !existing?.file_url && !submitComment.trim()) {
+            toast.error("Додайте файл або коментар до роботи");
+            return;
+        }
+
+        setSaving(true);
+
+        try {
+
+            let fileUrl = null;
+
+            if (submitFile) {
+                const { data } = await uploadHomeworkFile(submitFile);
+                fileUrl = data.url;
+            }
+
+            if (existing) {
+                await updateHomeworkSubmission(existing.id, {
+                    file_url: fileUrl,
+                    comment: submitComment
+                });
+            } else {
+                await createHomeworkSubmission({
+                    homework_id: submitFor.id,
+                    file_url: fileUrl,
+                    comment: submitComment
+                });
+            }
+
+            toast.success("Роботу надіслано");
+            setSubmitFor(null);
+            loadData();
+
+        } catch (error) {
+
+            toast.error(error.response?.data?.message || "Не вдалося надіслати роботу");
+
+        } finally {
+
+            setSaving(false);
+
+        }
+
+    };
+
+    const reviewList = reviewFor
+        ? submissions.filter((s) => String(s.homework_id) === String(reviewFor.id))
+        : [];
+
+    const openReview = (hw) => {
+        setReviewFor(hw);
+        const initial = {};
+        submissions
+            .filter((s) => String(s.homework_id) === String(hw.id))
+            .forEach((s) => { initial[s.id] = s.grade ?? ""; });
+        setReviewGrades(initial);
+    };
+
+    const handleGrade = async (submissionId) => {
+
+        const value = Number(reviewGrades[submissionId]);
+
+        if (!Number.isInteger(value) || value < 1 || value > 12) {
+            toast.error("Оцінка має бути від 1 до 12");
+            return;
+        }
+
+        try {
+
+            await updateHomeworkSubmission(submissionId, { grade: value });
+            toast.success("Оцінку збережено");
+            loadData();
+
+        } catch (error) {
+
+            toast.error(error.response?.data?.message || "Не вдалося зберегти оцінку");
+
+        }
+
+    };
+
     const handleDelete = async (id) => {
 
         if (!window.confirm("Видалити це завдання?")) {
@@ -261,12 +381,14 @@ function Homework() {
 
                 <h1>Домашні завдання</h1>
 
-                <button
-                    className="dp-btn dp-btn-primary"
-                    onClick={openCreate}
-                >
-                    <FaPlus /> Додати завдання
-                </button>
+                {canEdit && (
+                    <button
+                        className="dp-btn dp-btn-primary"
+                        onClick={openCreate}
+                    >
+                        <FaPlus /> Додати завдання
+                    </button>
+                )}
 
             </div>
 
@@ -339,6 +461,18 @@ function Homework() {
                                     </div>
                                 </div>
 
+                                {student ? (
+                                    <div className="hw-card-col hw-progress-col">
+                                        <div className="hw-col-label">Моя робота</div>
+                                        <div className="hw-col-value">
+                                            {mySubmission(hw)
+                                                ? mySubmission(hw).grade
+                                                    ? `Оцінка: ${mySubmission(hw).grade}`
+                                                    : "Здано, на перевірці"
+                                                : "Не здано"}
+                                        </div>
+                                    </div>
+                                ) : (
                                 <div className="hw-card-col hw-progress-col">
                                     <div className="hw-col-label">Здано</div>
                                     <div className="hw-col-value">
@@ -354,22 +488,43 @@ function Homework() {
                                         />
                                     </div>
                                 </div>
+                                )}
 
                                 <div className="hw-card-actions">
-                                    <button
-                                        className="dp-icon-btn"
-                                        onClick={() => openEdit(hw)}
-                                        title="Редагувати"
-                                    >
-                                        <FaEdit />
-                                    </button>
-                                    <button
-                                        className="dp-icon-btn danger"
-                                        onClick={() => handleDelete(hw.id)}
-                                        title="Видалити"
-                                    >
-                                        <FaTrash />
-                                    </button>
+                                    {student && !mySubmission(hw)?.grade && (
+                                        <button
+                                            className="dp-icon-btn"
+                                            onClick={() => openSubmit(hw)}
+                                            title={mySubmission(hw) ? "Змінити роботу" : "Здати роботу"}
+                                        >
+                                            <FaUpload />
+                                        </button>
+                                    )}
+                                    {canEdit && (
+                                        <>
+                                            <button
+                                                className="dp-icon-btn"
+                                                onClick={() => openReview(hw)}
+                                                title="Роботи учнів"
+                                            >
+                                                <FaInbox />
+                                            </button>
+                                            <button
+                                                className="dp-icon-btn"
+                                                onClick={() => openEdit(hw)}
+                                                title="Редагувати"
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                className="dp-icon-btn danger"
+                                                onClick={() => handleDelete(hw.id)}
+                                                title="Видалити"
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
 
                             </div>
@@ -379,6 +534,126 @@ function Homework() {
 
                 </div>
 
+            )}
+
+            {submitFor && (
+                <div className="dp-modal-backdrop" onClick={() => setSubmitFor(null)}>
+                    <div className="dp-modal" onClick={(e) => e.stopPropagation()}>
+
+                        <h2>Здати роботу</h2>
+                        <div className="dp-header-sub" style={{ marginBottom: 16 }}>
+                            {submitFor.title} · {submitFor.subject_name}
+                        </div>
+
+                        <form onSubmit={handleSubmitWork}>
+
+                            <div className="dp-form-group">
+                                <label>Файл (PDF, DOC, DOCX, TXT, JPG, PNG, ZIP — до 10 МБ)</label>
+                                <input
+                                    type="file"
+                                    onChange={(e) => setSubmitFile(e.target.files[0] || null)}
+                                />
+                                {mySubmission(submitFor)?.file_url && !submitFile && (
+                                    <a
+                                        href={getPhotoUrl(mySubmission(submitFor).file_url)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <FaPaperclip /> Завантажений файл
+                                    </a>
+                                )}
+                            </div>
+
+                            <div className="dp-form-group">
+                                <label>Коментар</label>
+                                <textarea
+                                    value={submitComment}
+                                    onChange={(e) => setSubmitComment(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="dp-modal-actions">
+                                <button
+                                    type="button"
+                                    className="dp-btn dp-btn-secondary"
+                                    onClick={() => setSubmitFor(null)}
+                                >
+                                    <FaTimes /> Скасувати
+                                </button>
+                                <button type="submit" className="dp-btn dp-btn-primary" disabled={saving}>
+                                    {saving ? "Надсилання..." : "Надіслати"}
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            )}
+
+            {reviewFor && (
+                <div className="dp-modal-backdrop" onClick={() => setReviewFor(null)}>
+                    <div className="dp-modal hw-review-modal" onClick={(e) => e.stopPropagation()}>
+
+                        <h2>Роботи учнів</h2>
+                        <div className="dp-header-sub" style={{ marginBottom: 16 }}>
+                            {reviewFor.title} · {reviewFor.class_name}
+                        </div>
+
+                        {reviewList.length === 0 ? (
+                            <div className="dp-empty">Ще ніхто не здав роботу</div>
+                        ) : (
+                            <div className="hw-review-list">
+                                {reviewList.map((sub) => (
+                                    <div className="hw-review-row" key={sub.id}>
+                                        <div className="hw-review-main">
+                                            <div className="hw-card-title">
+                                                {sub.last_name} {sub.first_name}
+                                            </div>
+                                            <div className="hw-card-sub">
+                                                {dayjs(sub.submitted_at).format("DD.MM.YYYY HH:mm")}
+                                                {sub.comment ? ` · ${sub.comment}` : ""}
+                                            </div>
+                                            {sub.file_url && (
+                                                <a href={getPhotoUrl(sub.file_url)} target="_blank" rel="noreferrer">
+                                                    <FaPaperclip /> Файл роботи
+                                                </a>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="12"
+                                            placeholder="1–12"
+                                            value={reviewGrades[sub.id] ?? ""}
+                                            onChange={(e) =>
+                                                setReviewGrades({ ...reviewGrades, [sub.id]: e.target.value })
+                                            }
+                                        />
+                                        <button
+                                            type="button"
+                                            className="dp-btn dp-btn-primary"
+                                            onClick={() => handleGrade(sub.id)}
+                                        >
+                                            Оцінити
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="dp-modal-actions">
+                            <button
+                                type="button"
+                                className="dp-btn dp-btn-secondary"
+                                onClick={() => setReviewFor(null)}
+                            >
+                                Закрити
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
             )}
 
             {showModal && (
@@ -446,6 +721,7 @@ function Homework() {
                                 </select>
                             </div>
 
+                            {user?.role !== "teacher" && (
                             <div className="dp-form-group">
                                 <label>Вчитель</label>
                                 <select
@@ -461,6 +737,7 @@ function Homework() {
                                     ))}
                                 </select>
                             </div>
+                            )}
 
                             <div className="dp-form-group">
                                 <label>Дедлайн</label>

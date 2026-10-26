@@ -1,10 +1,11 @@
+const { sendError } = require("../utils/sendError");
 const subjectService = require("../services/subjectService");
 
 const getAllSubjects = async (req, res) => {
 
     try {
 
-        const subjects = await subjectService.getAllSubjects();
+        const subjects = await subjectService.getAllSubjects(req.user);
 
         res.json({
             success: true,
@@ -13,12 +14,7 @@ const getAllSubjects = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -37,12 +33,7 @@ const createSubject = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -64,12 +55,7 @@ const updateSubject = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -99,12 +85,7 @@ const deleteSubject = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 

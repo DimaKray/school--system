@@ -1,6 +1,6 @@
 const pool = require("../config/db");
 
-const getAllGrades = async () => {
+const getAllGrades = async (studentIds = null) => {
 
     const result = await pool.query(`
         SELECT
@@ -37,8 +37,10 @@ const getAllGrades = async () => {
         JOIN users AS teacher_users
             ON teachers.user_id = teacher_users.id
 
+        WHERE ($1::int[] IS NULL OR grades.student_id = ANY($1::int[]))
+
         ORDER BY grades.created_at DESC
-    `);
+    `, [studentIds]);
 
     return result.rows;
 

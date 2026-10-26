@@ -1,10 +1,11 @@
+const { sendError } = require("../utils/sendError");
 const studentService = require("../services/studentService");
 
 const getAllStudents = async (req, res) => {
 
     try {
 
-        const students = await studentService.getAllStudents();
+        const students = await studentService.getAllStudents(req.user);
 
         res.status(200).json({
             success: true,
@@ -13,12 +14,7 @@ const getAllStudents = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Server error"
-        });
+        sendError(res, error);
 
     }
 
@@ -35,20 +31,11 @@ const createStudent = async (req, res) => {
             studentId: id
         });
 
-    }  catch (error) {
+    } catch (error) {
 
-    console.log("==========================");
-    console.log(error);
-    console.log(error.message);
-    console.log(error.stack);
-    console.log("==========================");
+        sendError(res, error);
 
-    res.status(500).json({
-        success: false,
-        message: error.message
-    });
-
-}
+    }
 
 };
 
@@ -68,12 +55,7 @@ const updateStudent = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -99,43 +81,7 @@ const deleteStudent = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
-    }
-
-};
-
-const deleteClass = async (req, res) => {
-
-    try {
-
-        const deleted = await classService.deleteClass(req.params.id);
-
-        if (!deleted) {
-            return res.status(404).json({
-                success: false,
-                message: "Class not found"
-            });
-        }
-
-        res.json({
-            success: true,
-            message: "Class deleted"
-        });
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 

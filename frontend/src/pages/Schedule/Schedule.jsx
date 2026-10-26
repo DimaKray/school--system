@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment } from "react";
+import { useContext, useEffect, useState, Fragment } from "react";
 import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -15,6 +15,8 @@ import { getTeachers } from "../../services/teacherService";
 import { getSubjectColor } from "../../utils/subjectColors";
 import { getLessonTime } from "../../utils/lessonTimes";
 import { getCurrentWeekDays, getWeekRangeLabel } from "../../utils/weekDates";
+import { AuthContext } from "../../context/AuthContext";
+import { canManageStructure } from "../../utils/permissions";
 
 import "./Schedule.css";
 
@@ -30,6 +32,9 @@ const emptyForm = {
 };
 
 function Schedule() {
+
+    const { user } = useContext(AuthContext);
+    const canEdit = canManageStructure(user);
 
     const [schedule, setSchedule] = useState([]);
     const [classes, setClasses] = useState([]);
@@ -301,7 +306,7 @@ function Schedule() {
                                                         background: color.bg,
                                                         color: color.text
                                                     }}
-                                                    onClick={() => openEdit(lesson)}
+                                                    onClick={() => canEdit && openEdit(lesson)}
                                                 >
                                                     <div className="sch-lesson-subject">
                                                         {lesson.subject_name}
@@ -310,7 +315,7 @@ function Schedule() {
                                                         {lesson.class_name}
                                                     </div>
                                                 </button>
-                                            ) : (
+                                            ) : canEdit ? (
                                                 <button
                                                     type="button"
                                                     className="sch-empty-cell"
@@ -318,7 +323,7 @@ function Schedule() {
                                                 >
                                                     +
                                                 </button>
-                                            )}
+                                            ) : null}
                                         </div>
                                     );
 

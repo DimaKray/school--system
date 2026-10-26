@@ -4,6 +4,8 @@ const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
+const validate = require("../middlewares/validate");
+const v = require("../validators");
 
 const {
     getAllSubjects,
@@ -14,10 +16,10 @@ const {
 
 router.get("/", authMiddleware, getAllSubjects);
 
-router.post("/", authMiddleware, roleMiddleware("admin"), createSubject);
+router.post("/", authMiddleware, roleMiddleware("admin"), validate(v.subjectBody), createSubject);
 
-router.put("/:id", authMiddleware, roleMiddleware("admin"), updateSubject);
+router.put("/:id", authMiddleware, roleMiddleware("admin"), validate([...v.routeId, ...v.subjectBody]), updateSubject);
 
-router.delete("/:id", authMiddleware, roleMiddleware("admin"), deleteSubject);
+router.delete("/:id", authMiddleware, roleMiddleware("admin"), validate(v.routeId), deleteSubject);
 
 module.exports = router;

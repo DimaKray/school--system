@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { FaPlus, FaTimes, FaSearch } from "react-icons/fa";
 import { toast } from "react-toastify";
 import _ from "lodash";
@@ -14,6 +14,8 @@ import { getGrades } from "../../services/gradeService";
 import { uploadPhoto } from "../../services/uploadService";
 import Avatar from "../../components/Avatar";
 import ActionsMenu from "../../components/ActionsMenu";
+import { AuthContext } from "../../context/AuthContext";
+import { canManageStructure } from "../../utils/permissions";
 
 import "../../styles/DataPage.css";
 import "./Students.css";
@@ -31,6 +33,9 @@ const emptyForm = {
 };
 
 function Students() {
+
+    const { user } = useContext(AuthContext);
+    const canEdit = canManageStructure(user);
 
     const [students, setStudents] = useState([]);
     const [classes, setClasses] = useState([]);
@@ -264,12 +269,14 @@ function Students() {
 
                 <h1>Учні</h1>
 
-                <button
-                    className="dp-btn dp-btn-primary"
-                    onClick={openCreate}
-                >
-                    <FaPlus /> Додати учня
-                </button>
+                {canEdit && (
+                    <button
+                        className="dp-btn dp-btn-primary"
+                        onClick={openCreate}
+                    >
+                        <FaPlus /> Додати учня
+                    </button>
+                )}
 
             </div>
 
@@ -335,10 +342,12 @@ function Students() {
                                         {averageByStudent[s.id] ?? "—"}
                                     </td>
                                     <td>
-                                        <ActionsMenu
-                                            onEdit={() => openEdit(s)}
-                                            onDelete={() => handleDelete(s.id)}
-                                        />
+                                        {canEdit && (
+                                            <ActionsMenu
+                                                onEdit={() => openEdit(s)}
+                                                onDelete={() => handleDelete(s.id)}
+                                            />
+                                        )}
                                     </td>
                                 </tr>
                             ))}

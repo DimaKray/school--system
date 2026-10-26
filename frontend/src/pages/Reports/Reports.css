@@ -1,0 +1,134 @@
+.rp-cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+    gap:14px;
+    margin-bottom:22px;
+}
+
+.rp-card{
+    background:white;
+    border-radius:14px;
+    padding:16px 18px;
+    box-shadow:0 5px 18px rgba(0,0,0,.06);
+}
+
+.rp-card-value{
+    font-size:24px;
+    font-weight:700;
+    color:#7367F0;
+}
+
+.rp-card-label{
+    font-size:13px;
+    color:#888;
+    margin-top:4px;
+}
+
+.rp-tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+}
+
+.rp-tab{
+    border:1px solid #ddd;
+    background:white;
+    color:#555;
+    border-radius:20px;
+    padding:8px 16px;
+    font-size:14px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.rp-tab.active,
+.rp-tab:hover{
+    background:#7367F0;
+    border-color:#7367F0;
+    color:white;
+}
+
+.rp-filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:16px;
+    align-items:center;
+}
+
+.rp-filters select,
+.rp-filters input{
+    padding:9px 12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    font-size:14px;
+    background:white;
+}
+
+.rp-filters label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:#555;
+}
+
+.rp-section{
+    margin-top:26px;
+}
+
+.rp-section-head{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:14px;
+}
+
+.rp-section-head h2{
+    font-size:18px;
+}
+
+.rp-section-head select{
+    padding:9px 12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    font-size:14px;
+}
+
+.rp-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:#f1f0ff;
+    color:#5b50d6;
+    border-radius:16px;
+    padding:4px 10px;
+    font-size:13px;
+    margin:2px 4px 2px 0;
+}
+
+.rp-chip button{
+    border:none;
+    background:none;
+    color:#e34848;
+    cursor:pointer;
+    font-size:12px;
+    padding:0;
+}
+
+.rp-inline{
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+.rp-inline select{
+    padding:7px 10px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    font-size:13px;
+    max-width:220px;
+}

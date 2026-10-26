@@ -8,7 +8,8 @@ const createClass = async (data) => {
 
     return await classModel.createClass(
         data.name,
-        data.school_year
+        data.school_year,
+        data.teacher_id
     );
 
 };
@@ -18,7 +19,8 @@ const updateClass = async (id, data) => {
     return await classModel.updateClass(
         id,
         data.name,
-        data.school_year
+        data.school_year,
+        data.teacher_id
     );
 
 };

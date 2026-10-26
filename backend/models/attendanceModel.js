@@ -1,6 +1,6 @@
 const pool = require("../config/db");
 
-const getAllAttendance = async () => {
+const getAllAttendance = async (studentIds = null) => {
 
     const result = await pool.query(`
         SELECT
@@ -17,13 +17,14 @@ const getAllAttendance = async () => {
         
         FROM attendance
 
-        jOIN students ON attendance.student_id = students.id
+        JOIN students ON attendance.student_id = students.id
         JOIN users AS student_users ON students.user_id = student_users.id
         LEFT JOIN classes ON students.class_id = classes.id
 
+        WHERE ($1::int[] IS NULL OR attendance.student_id = ANY($1::int[]))
+
         ORDER BY attendance.lesson_date DESC
-        
-    `);
+    `, [studentIds]);
     return result.rows;
 };
 
@@ -98,8 +99,49 @@ const deleteAttendance = async (id) => {
 
 };
 
+// Масове збереження відміток за день: INSERT ... ON CONFLICT DO UPDATE
+const upsertAttendanceBulk = async (lesson_date, records) => {
+
+    const client = await pool.connect();
+
+    try {
+
+        await client.query("BEGIN");
+
+        for (const record of records) {
+
+            await client.query(
+                `
+                INSERT INTO attendance (student_id, lesson_date, status)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (student_id, lesson_date)
+                DO UPDATE SET status = EXCLUDED.status
+                `,
+                [record.student_id, lesson_date, record.status]
+            );
+
+        }
+
+        await client.query("COMMIT");
+
+        return records.length;
+
+    } catch (error) {
+
+        await client.query("ROLLBACK");
+        throw error;
+
+    } finally {
+
+        client.release();
+
+    }
+
+};
+
 module.exports = {
     getAllAttendance,
+    upsertAttendanceBulk,
     createAttendance,
     updateAttendance,
     deleteAttendance

@@ -1,12 +1,11 @@
 const express = require("express");
+
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
-
-const controller = require("../controllers/studentController");
-
-console.log(controller);
+const validate = require("../middlewares/validate");
+const v = require("../validators");
 
 const {
     getAllStudents,
@@ -17,10 +16,10 @@ const {
 
 router.get("/", authMiddleware, getAllStudents);
 
-router.post("/", authMiddleware, roleMiddleware("admin"), createStudent);
+router.post("/", authMiddleware, roleMiddleware("admin"), validate(v.studentCreate), createStudent);
 
-router.put("/:id", authMiddleware, roleMiddleware("admin"), updateStudent);
+router.put("/:id", authMiddleware, roleMiddleware("admin"), validate([...v.routeId, ...v.studentUpdate]), updateStudent);
 
-router.delete("/:id", authMiddleware, roleMiddleware("admin"), deleteStudent);
+router.delete("/:id", authMiddleware, roleMiddleware("admin"), validate(v.routeId), deleteStudent);
 
 module.exports = router;

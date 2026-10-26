@@ -1,10 +1,11 @@
+const { sendError } = require("../utils/sendError");
 const homeworkService = require("../services/homeworkService");
 
 const getAllHomework = async (req, res) => {
 
     try {
 
-        const homework = await homeworkService.getAllHomework();
+        const homework = await homeworkService.getAllHomework(req.user);
 
         res.json({
             success: true,
@@ -13,12 +14,7 @@ const getAllHomework = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -28,7 +24,7 @@ const createHomework = async (req, res) => {
 
     try {
 
-        const id = await homeworkService.createHomework(req.body);
+        const id = await homeworkService.createHomework(req.body, req.user);
 
         res.status(201).json({
             success: true,
@@ -37,12 +33,7 @@ const createHomework = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -54,7 +45,8 @@ const updateHomework = async (req, res) => {
 
         await homeworkService.updateHomework(
             req.params.id,
-            req.body
+            req.body,
+            req.user
         );
 
         res.json({
@@ -64,12 +56,7 @@ const updateHomework = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -97,12 +84,7 @@ const deleteHomework = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 

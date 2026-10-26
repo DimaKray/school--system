@@ -10,3 +10,13 @@ export const uploadPhoto = (file) => {
     });
 
 };
+export const uploadHomeworkFile = (file) => {
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return api.post("/upload/homework", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+
+};

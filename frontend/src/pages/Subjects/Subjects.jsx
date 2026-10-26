@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { FaPlus, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import _ from "lodash";
@@ -13,6 +13,8 @@ import { getTeachers } from "../../services/teacherService";
 import { getSchedule } from "../../services/scheduleService";
 import { getGrades } from "../../services/gradeService";
 import { getSubjectStyle } from "../../utils/subjectStyle";
+import { AuthContext } from "../../context/AuthContext";
+import { canManageStructure } from "../../utils/permissions";
 
 import "../../styles/DataPage.css";
 import "./Subjects.css";
@@ -24,6 +26,9 @@ const emptyForm = {
 };
 
 function Subjects() {
+
+    const { user } = useContext(AuthContext);
+    const canEdit = canManageStructure(user);
 
     const [subjects, setSubjects] = useState([]);
     const [teachers, setTeachers] = useState([]);
@@ -208,12 +213,14 @@ function Subjects() {
                     </div>
                 </div>
 
-                <button
-                    className="dp-btn dp-btn-primary"
-                    onClick={openCreate}
-                >
-                    <FaPlus /> Додати предмет
-                </button>
+                {canEdit && (
+                    <button
+                        className="dp-btn dp-btn-primary"
+                        onClick={openCreate}
+                    >
+                        <FaPlus /> Додати предмет
+                    </button>
+                )}
 
             </div>
 
@@ -348,14 +355,16 @@ function Subjects() {
 
                             <div className="dp-modal-actions">
 
-                                <button
-                                    type="button"
-                                    className="dp-btn dp-btn-danger"
-                                    onClick={() => handleDelete(detailSubject.id)}
-                                    style={{ marginRight: "auto" }}
-                                >
-                                    <FaTrash /> Видалити
-                                </button>
+                                {canEdit && (
+                                    <button
+                                        type="button"
+                                        className="dp-btn dp-btn-danger"
+                                        onClick={() => handleDelete(detailSubject.id)}
+                                        style={{ marginRight: "auto" }}
+                                    >
+                                        <FaTrash /> Видалити
+                                    </button>
+                                )}
 
                                 <button
                                     type="button"
@@ -365,13 +374,15 @@ function Subjects() {
                                     Закрити
                                 </button>
 
-                                <button
-                                    type="button"
-                                    className="dp-btn dp-btn-primary"
-                                    onClick={() => openEdit(detailSubject)}
-                                >
-                                    <FaEdit /> Редагувати
-                                </button>
+                                {canEdit && (
+                                    <button
+                                        type="button"
+                                        className="dp-btn dp-btn-primary"
+                                        onClick={() => openEdit(detailSubject)}
+                                    >
+                                        <FaEdit /> Редагувати
+                                    </button>
+                                )}
 
                             </div>
 

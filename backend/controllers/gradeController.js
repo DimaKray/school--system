@@ -1,10 +1,11 @@
+const { sendError } = require("../utils/sendError");
 const gradeService = require("../services/gradeService");
 
 const getAllGrades = async (req, res) => {
 
     try {
 
-        const grades = await gradeService.getAllGrades();
+        const grades = await gradeService.getAllGrades(req.user);
 
         res.json({
             success: true,
@@ -13,12 +14,7 @@ const getAllGrades = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -28,7 +24,7 @@ const createGrade = async (req, res) => {
 
     try {
 
-        const id = await gradeService.createGrade(req.body);
+        const id = await gradeService.createGrade(req.body, req.user);
 
         res.status(201).json({
             success: true,
@@ -37,12 +33,7 @@ const createGrade = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -54,7 +45,8 @@ const updateGrade = async (req, res) => {
 
         await gradeService.updateGrade(
             req.params.id,
-            req.body
+            req.body,
+            req.user
         );
 
         res.json({
@@ -64,12 +56,7 @@ const updateGrade = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -97,12 +84,7 @@ const deleteGrade = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 

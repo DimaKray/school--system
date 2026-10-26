@@ -1,10 +1,11 @@
+const { sendError } = require("../utils/sendError");
 const classService = require("../services/classService");
 
 const getAllClasses = async (req, res) => {
 
     try {
 
-        const classes = await classService.getAllClasses();
+        const classes = await classService.getAllClasses(req.user);
 
         res.json({
             success: true,
@@ -13,12 +14,7 @@ const getAllClasses = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -37,12 +33,7 @@ const createClass = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -64,12 +55,7 @@ const updateClass = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -95,12 +81,7 @@ const deleteClass = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 

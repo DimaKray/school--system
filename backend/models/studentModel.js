@@ -1,7 +1,7 @@
 const pool = require("../config/db");
 const bcrypt = require("bcrypt");
 
-const getAllStudents = async () => {
+const getAllStudents = async (studentIds = null) => {
   const result = await pool.query(`
         SELECT
             students.id,
@@ -17,8 +17,9 @@ const getAllStudents = async () => {
         FROM students
         JOIN users ON students.user_id = users.id
         LEFT JOIN classes ON students.class_id = classes.id
+        WHERE ($1::int[] IS NULL OR students.id = ANY($1::int[]))
         ORDER BY users.last_name
-    `);
+    `, [studentIds]);
 
   return result.rows;
 };

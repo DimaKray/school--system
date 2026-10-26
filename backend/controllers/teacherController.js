@@ -1,10 +1,11 @@
+const { sendError } = require("../utils/sendError");
 const teacherService = require("../services/teacherService");
 
 const getAllTeachers = async (req, res) => {
 
     try {
 
-        const teachers = await teacherService.getAllTeachers();
+        const teachers = await teacherService.getAllTeachers(req.user);
 
         res.json({
             success: true,
@@ -13,12 +14,7 @@ const getAllTeachers = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -37,12 +33,7 @@ const createTeacher = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -64,12 +55,7 @@ const updateTeacher = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -95,12 +81,7 @@ const deleteTeacher = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 

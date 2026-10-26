@@ -4,20 +4,28 @@ const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
+const validate = require("../middlewares/validate");
+const v = require("../validators");
 
 const {
     getAllAttendance,
     createAttendance,
+    saveAttendanceBulk,
     updateAttendance,
     deleteAttendance
 } = require("../controllers/attendanceController");
 
+const staff = roleMiddleware("admin", "teacher");
+
 router.get("/", authMiddleware, getAllAttendance);
 
-router.post("/", authMiddleware, roleMiddleware("admin", "teacher"), createAttendance);
+router.post("/", authMiddleware, staff, validate(v.attendanceBody), createAttendance);
 
-router.put("/:id", authMiddleware, roleMiddleware("admin", "teacher"), updateAttendance);
+// Відмітка всього класу за день одним запитом
+router.post("/bulk", authMiddleware, staff, validate(v.attendanceBulk), saveAttendanceBulk);
 
-router.delete("/:id", authMiddleware, roleMiddleware("admin", "teacher"), deleteAttendance);
+router.put("/:id", authMiddleware, staff, validate([...v.routeId, ...v.attendanceBody]), updateAttendance);
+
+router.delete("/:id", authMiddleware, staff, validate(v.routeId), deleteAttendance);
 
 module.exports = router;

@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
+const validate = require("../middlewares/validate");
+const v = require("../validators");
 
 const {
     getAllHomeworkSubmissions,
@@ -11,28 +13,14 @@ const {
     deleteHomeworkSubmission
 } = require("../controllers/homeworkSubmissionController");
 
-router.get(
-    "/",
-    authMiddleware,
-    getAllHomeworkSubmissions
-);
+// Права перевіряються в сервісі: учень — лише свої роботи,
+// вчитель і адміністратор — оцінювання.
+router.get("/", authMiddleware, getAllHomeworkSubmissions);
 
-router.post(
-    "/",
-    authMiddleware,
-    createHomeworkSubmission
-);
+router.post("/", authMiddleware, validate(v.submissionCreate), createHomeworkSubmission);
 
-router.put(
-    "/:id",
-    authMiddleware,
-    updateHomeworkSubmission
-);
+router.put("/:id", authMiddleware, validate(v.submissionUpdate), updateHomeworkSubmission);
 
-router.delete(
-    "/:id",
-    authMiddleware,
-    deleteHomeworkSubmission
-);
+router.delete("/:id", authMiddleware, validate(v.routeId), deleteHomeworkSubmission);
 
 module.exports = router;

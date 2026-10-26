@@ -1,10 +1,11 @@
+const { sendError } = require("../utils/sendError");
 const scheduleService = require("../services/scheduleService");
 
 const getAllSchedule = async (req, res) => {
 
     try {
 
-        const schedule = await scheduleService.getAllSchedule();
+        const schedule = await scheduleService.getAllSchedule(req.user);
 
         res.json({
             success: true,
@@ -13,12 +14,7 @@ const getAllSchedule = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -37,12 +33,7 @@ const createSchedule = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -64,12 +55,7 @@ const updateSchedule = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 
@@ -99,12 +85,7 @@ const deleteSchedule = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        sendError(res, error);
 
     }
 

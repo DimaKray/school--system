@@ -14,6 +14,8 @@ import Journal from "./pages/Journal/Journal";
 import Analytics from "./pages/Analytics/Analytics";
 import Homework from "./pages/Homework/Homework";
 import Settings from "./pages/Settings/Settings";
+import Reports from "./pages/Reports/Reports";
+import Parents from "./pages/Parents/Parents";
 
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -45,6 +47,8 @@ function App() {
                     <Route path="/journal" element={<Journal />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/homework" element={<Homework />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/parents" element={<Parents />} />
                     <Route path="/settings" element={<Settings />} />
                 </Route>
 

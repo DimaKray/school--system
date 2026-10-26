@@ -15,6 +15,7 @@ async function seed() {
 
         await pool.query(`
             TRUNCATE TABLE
+                parent_students,
                 homework_submissions,
                 homework,
                 attendance,
@@ -98,6 +99,14 @@ async function seed() {
         }
 
         console.log(`✅ Вчителі: ${teacherIds.length}`);
+
+        // ===== КЛАСНІ КЕРІВНИКИ =====
+        for (let i = 0; i < classIds.length; i++) {
+            await pool.query(
+                "UPDATE classes SET teacher_id = $1 WHERE id = $2",
+                [teacherIds[i % teacherIds.length], classIds[i]]
+            );
+        }
 
         // ===== SUBJECTS =====
         const subjectNames = [
@@ -216,7 +225,10 @@ async function seed() {
                 const subjectId = subjectIds[subjectIndex];
                 const teacherId = subjectNames[subjectIndex][1];
 
-                const grade = 4 + Math.floor(Math.random() * 9); // 4..12
+                // ~8% незадовільних оцінок (1..3) для звіту про неуспішність
+                const grade = Math.random() < 0.08
+                    ? 1 + Math.floor(Math.random() * 3)
+                    : 4 + Math.floor(Math.random() * 9); // 4..12
                 const daysAgo = Math.floor(Math.random() * 30);
 
                 await pool.query(
@@ -294,10 +306,37 @@ async function seed() {
 
         console.log(`✅ Домашні завдання: ${homeworkCount}`);
 
+        // ===== БАТЬКИ =====
+        const parentData = [
+            ["Ірина", "Іваненко", "parent1@school.com", [0]],
+            ["Сергій", "Гриценко", "parent2@school.com", [1, 4]]
+        ];
+
+        for (const [first, last, email, childIdx] of parentData) {
+
+            const parentResult = await pool.query(
+                `INSERT INTO users (first_name, last_name, email, password, role)
+                 VALUES ($1, $2, $3, $4, 'parent')
+                 RETURNING id`,
+                [first, last, email, hash]
+            );
+
+            for (const idx of childIdx) {
+                await pool.query(
+                    "INSERT INTO parent_students (parent_user_id, student_id) VALUES ($1, $2)",
+                    [parentResult.rows[0].id, studentIds[idx].id]
+                );
+            }
+
+        }
+
+        console.log(`✅ Батьки: ${parentData.length}`);
+
         console.log("\n🎉 Seed завершено успішно!");
         console.log("   Логін адміна: admin@school.com / " + PASSWORD);
         console.log("   Логін учня: student1@school.com / " + PASSWORD);
         console.log("   Логін вчителя: koval@school.com / " + PASSWORD);
+        console.log("   Логін батьків: parent1@school.com / " + PASSWORD);
 
         process.exit(0);
 

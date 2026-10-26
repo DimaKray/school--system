@@ -1,6 +1,6 @@
 const pool = require("../config/db");
 
-const getAllHomework = async () => {
+const getAllHomework = async (classIds = null) => {
 
     const result = await pool.query(`
         SELECT
@@ -32,8 +32,10 @@ const getAllHomework = async () => {
         JOIN users
             ON teachers.user_id = users.id
 
+        WHERE ($1::int[] IS NULL OR homework.class_id = ANY($1::int[]))
+
         ORDER BY homework.deadline
-    `);
+    `, [classIds]);
 
     return result.rows;
 

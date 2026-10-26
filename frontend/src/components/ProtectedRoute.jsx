@@ -7,7 +7,9 @@ const ROUTE_ROLES = {
     "/classes": ["admin"],
     "/students": ["admin", "teacher"],
     "/subjects": ["admin", "teacher"],
-    "/analytics": ["admin", "teacher"]
+    "/analytics": ["admin", "teacher"],
+    "/reports": ["admin", "teacher"],
+    "/parents": ["admin"]
 };
 
 function ProtectedRoute({ children }) {

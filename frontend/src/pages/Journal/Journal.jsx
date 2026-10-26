@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { toast } from "react-toastify";
-import { FaTimes, FaDownload, FaPlus } from "react-icons/fa";
+import { FaTimes, FaDownload, FaPlus, FaUserCheck } from "react-icons/fa";
 
 import { getStudents } from "../../services/studentService";
 import { getClasses } from "../../services/classService";
@@ -13,7 +13,9 @@ import {
   createGrade,
   updateGrade,
 } from "../../services/gradeService";
-import { getAttendance } from "../../services/attendanceService";
+import { getAttendance, saveAttendanceBulk } from "../../services/attendanceService";
+import { AuthContext } from "../../context/AuthContext";
+import { canManageAcademics } from "../../utils/permissions";
 
 import { getGradeColor, getAttendanceColor } from "../../utils/gradeColors";
 
@@ -60,7 +62,16 @@ const emptyGradeForm = {
   date: dayjs().format("YYYY-MM-DD"),
 };
 
+const ATTENDANCE_STATUSES = [
+  { value: "present", label: "Присутній" },
+  { value: "late", label: "Запізнився" },
+  { value: "absent", label: "Відсутній" },
+];
+
 function Journal() {
+  const { user } = useContext(AuthContext);
+  const canEdit = canManageAcademics(user);
+
   const [students, setStudents] = useState([]);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -79,6 +90,11 @@ function Journal() {
   const [form, setForm] = useState(emptyGradeForm);
   const [saving, setSaving] = useState(false);
 
+  // Відмітка відвідуваності
+  const [showAttendance, setShowAttendance] = useState(false);
+  const [attendanceDate, setAttendanceDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [attendanceMarks, setAttendanceMarks] = useState({});
+
   const loadData = async () => {
     setLoading(true);
 
@@ -95,13 +111,21 @@ function Journal() {
       const loadedClasses = classesRes.data.classes || [];
       const loadedSubjects = subjectsRes.data.subjects || [];
 
-      setStudents(studentsRes.data.students || []);
+      const loadedStudents = studentsRes.data.students || [];
+
+      setStudents(loadedStudents);
       setClasses(loadedClasses);
       setSubjects(loadedSubjects);
       setGrades(gradesRes.data.grades || []);
       setAttendance(attendanceRes.data.attendance || []);
 
-      if (!classId && loadedClasses.length > 0) {
+      // Учень і батьки за замовчуванням бачать клас свій / своєї дитини
+      const ownClassId =
+        !canManageAcademics(user) && loadedStudents[0]?.class_id;
+
+      if (!classId && ownClassId) {
+        setClassId(String(ownClassId));
+      } else if (!classId && loadedClasses.length > 0) {
         setClassId(String(loadedClasses[0].id));
       }
 
@@ -301,6 +325,56 @@ function Journal() {
     }
   };
 
+  const openAttendance = () => {
+    setAttendanceDate(dayjs().format("YYYY-MM-DD"));
+    setShowAttendance(true);
+  };
+
+  // Заповнюємо відмітки з уже збережених даних за обрану дату
+  useEffect(() => {
+    if (!showAttendance) return;
+
+    const marks = {};
+
+    classStudents.forEach((student) => {
+      const record = attendance.find(
+        (a) =>
+          a.student_id === student.id &&
+          dayjs(a.lesson_date).format("YYYY-MM-DD") === attendanceDate,
+      );
+      marks[student.id] = record ? record.status : "present";
+    });
+
+    setAttendanceMarks(marks);
+  }, [showAttendance, attendanceDate, classStudents, attendance]);
+
+  const handleSaveAttendance = async () => {
+    const records = classStudents.map((student) => ({
+      student_id: student.id,
+      status: attendanceMarks[student.id] || "present",
+    }));
+
+    if (records.length === 0) {
+      toast.error("У класі немає учнів");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      await saveAttendanceBulk(attendanceDate, records);
+      toast.success("Відвідуваність збережено");
+      setShowAttendance(false);
+      loadData();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Не вдалося зберегти відвідуваність",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleExport = () => {
     if (classStudents.length === 0) {
       toast.error("Немає даних для експорту");
@@ -356,9 +430,17 @@ function Journal() {
             <FaDownload /> Експорт
           </button>
 
-          <button className="dp-btn dp-btn-primary" onClick={openAddModal}>
-            <FaPlus /> Додати оцінку
-          </button>
+          {canEdit && (
+            <button className="dp-btn dp-btn-secondary" onClick={openAttendance}>
+              <FaUserCheck /> Відвідуваність
+            </button>
+          )}
+
+          {canEdit && (
+            <button className="dp-btn dp-btn-primary" onClick={openAddModal}>
+              <FaPlus /> Додати оцінку
+            </button>
+          )}
         </div>
       </div>
 
@@ -456,10 +538,13 @@ function Journal() {
                                 background: color.bg,
                                 color: color.text,
                               }}
+                              disabled={!canEdit}
+                              title={record?.comment || undefined}
                               onClick={() =>
-                                record
+                                canEdit &&
+                                (record
                                   ? openEditModal(record)
-                                  : openQuickAdd(student.id, date)
+                                  : openQuickAdd(student.id, date))
                               }
                             >
                               {record ? record.grade : "–"}
@@ -496,6 +581,70 @@ function Journal() {
           )}
         </div>
       </div>
+
+      {showAttendance && (
+        <div
+          className="dp-modal-backdrop"
+          onClick={() => setShowAttendance(false)}
+        >
+          <div className="dp-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Відвідуваність</h2>
+
+            <div className="dp-form-group">
+              <label>Дата</label>
+              <input
+                type="date"
+                value={attendanceDate}
+                onChange={(e) => setAttendanceDate(e.target.value)}
+              />
+            </div>
+
+            <div className="jr-att-list">
+              {classStudents.map((student) => (
+                <div className="jr-att-row" key={student.id}>
+                  <span>
+                    {student.last_name} {student.first_name}
+                  </span>
+                  <select
+                    value={attendanceMarks[student.id] || "present"}
+                    onChange={(e) =>
+                      setAttendanceMarks({
+                        ...attendanceMarks,
+                        [student.id]: e.target.value,
+                      })
+                    }
+                  >
+                    {ATTENDANCE_STATUSES.map((st) => (
+                      <option key={st.value} value={st.value}>
+                        {st.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+
+            <div className="dp-modal-actions">
+              <button
+                type="button"
+                className="dp-btn dp-btn-secondary"
+                onClick={() => setShowAttendance(false)}
+              >
+                <FaTimes /> Скасувати
+              </button>
+
+              <button
+                type="button"
+                className="dp-btn dp-btn-primary"
+                disabled={saving}
+                onClick={handleSaveAttendance}
+              >
+                {saving ? "Збереження..." : "Зберегти"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="dp-modal-backdrop" onClick={closeModal}>
