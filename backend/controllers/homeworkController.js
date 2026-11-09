@@ -66,7 +66,7 @@ const deleteHomework = async (req, res) => {
 
     try {
 
-        const deleted = await homeworkService.deleteHomework(req.params.id);
+        const deleted = await homeworkService.deleteHomework(req.params.id, req.user);
 
         if (!deleted) {
 

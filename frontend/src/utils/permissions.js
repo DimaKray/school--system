@@ -14,3 +14,10 @@ export const isAdminOrTeacher = (user) =>
     user?.role === "admin" || user?.role === "teacher";
 
 export const isStudent = (user) => user?.role === "student";
+
+// Предмети, з якими користувач може працювати у формах (оцінки, ДЗ).
+// Вчитель бачить лише свої предмети — сервер так само відхилить чужі.
+export const editableSubjects = (subjects, user) =>
+    user?.role === "teacher"
+        ? subjects.filter((s) => s.teacher_user_id === user.id)
+        : subjects;

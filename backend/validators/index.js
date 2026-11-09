@@ -47,8 +47,8 @@ module.exports = {
         email,
         password,
         body("role")
-            .isIn(["teacher", "student", "parent"])
-            .withMessage("Самостійна реєстрація доступна лише для ролей: вчитель, учень, батьки")
+            .isIn(["student", "parent"])
+            .withMessage("Самостійна реєстрація доступна лише для ролей: учень, батьки")
     ],
 
     login: [

@@ -4,8 +4,11 @@ const pool = require("../config/db");
 const { sendError } = require("../utils/sendError");
 
 /*
- * Самостійна реєстрація. Роль «admin» тут заборонена (див. validators/index.js):
- * облікові записи адміністраторів створюються лише вручну або через seed.
+ * Самостійна реєстрація — лише для ролей «учень» і «батьки» (див. validators/index.js).
+ * Облікові записи вчителів і адміністраторів створює адміністратор
+ * (розділ «Вчителі») або seed: інакше будь-хто міг би отримати права вчителя.
+ * Зареєстрований учень бачить дані після того, як адміністратор додасть його до класу,
+ * батьки — після прив'язки до дитини.
  */
 const register = async (req, res) => {
 
@@ -27,11 +30,40 @@ const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await pool.query(
-            `INSERT INTO users (first_name, last_name, email, password, role)
-             VALUES ($1, $2, $3, $4, $5)`,
-            [first_name, last_name, email, hashedPassword, role]
-        );
+        // Користувач і (для учня) профіль у таблиці students створюються в одній транзакції,
+        // щоб новий учень одразу з'явився в розділі «Учні» і адміністратор міг додати його до класу.
+        const client = await pool.connect();
+
+        try {
+
+            await client.query("BEGIN");
+
+            const created = await client.query(
+                `INSERT INTO users (first_name, last_name, email, password, role)
+                 VALUES ($1, $2, $3, $4, $5)
+                 RETURNING id`,
+                [first_name, last_name, email, hashedPassword, role]
+            );
+
+            if (role === "student") {
+                await client.query(
+                    "INSERT INTO students (user_id) VALUES ($1)",
+                    [created.rows[0].id]
+                );
+            }
+
+            await client.query("COMMIT");
+
+        } catch (error) {
+
+            await client.query("ROLLBACK");
+            throw error;
+
+        } finally {
+
+            client.release();
+
+        }
 
         res.status(201).json({
             success: true,

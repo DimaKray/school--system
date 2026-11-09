@@ -156,7 +156,6 @@ function Register() {
                             value={form.role}
                             onChange={handleChange}
                         >
-                            <option value="teacher">Вчитель</option>
                             <option value="student">Учень</option>
                             <option value="parent">Батьки</option>
                         </select>

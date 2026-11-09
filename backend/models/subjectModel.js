@@ -8,6 +8,7 @@ const getAllSubjects = async () => {
             subjects.name,
             subjects.description,
             subjects.teacher_id,
+            users.id AS teacher_user_id,
             users.first_name,
             users.last_name
         FROM subjects
@@ -98,4 +99,4 @@ module.exports = {
     createSubject,
     updateSubject,
     deleteSubject
-};
+};

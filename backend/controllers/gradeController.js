@@ -66,7 +66,7 @@ const deleteGrade = async (req, res) => {
 
     try {
 
-        const deleted = await gradeService.deleteGrade(req.params.id);
+        const deleted = await gradeService.deleteGrade(req.params.id, req.user);
 
         if (!deleted) {
 

@@ -15,7 +15,7 @@ import {
 } from "../../services/gradeService";
 import { getAttendance, saveAttendanceBulk } from "../../services/attendanceService";
 import { AuthContext } from "../../context/AuthContext";
-import { canManageAcademics } from "../../utils/permissions";
+import { canManageAcademics, editableSubjects } from "../../utils/permissions";
 
 import { getGradeColor, getAttendanceColor } from "../../utils/gradeColors";
 
@@ -216,12 +216,18 @@ function Journal() {
     return Math.round((score / records.length) * 100);
   };
 
+  // Предмет за замовчуванням у формі — поточний фільтр, якщо користувач може з ним працювати
+  const defaultFormSubject = () =>
+    editableSubjects(subjects, user).some((s) => String(s.id) === String(subjectId))
+      ? subjectId
+      : "";
+
   const openAddModal = () => {
     setEditingId(null);
 
     setForm({
       ...emptyGradeForm,
-      subject_id: subjectId,
+      subject_id: defaultFormSubject(),
     });
 
     setShowModal(true);
@@ -246,7 +252,7 @@ function Journal() {
 
     setForm({
       student_id: studentId,
-      subject_id: subjectId,
+      subject_id: defaultFormSubject(),
       grade: "",
       comment: "",
       date,
@@ -676,7 +682,7 @@ function Journal() {
                   onChange={handleChange}
                 >
                   <option value="">Оберіть предмет</option>
-                  {subjects.map((s) => (
+                  {editableSubjects(subjects, user).map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
                     </option>

@@ -15,8 +15,7 @@ const PG_ERRORS = {
 
 const sendError = (res, error) => {
 
-    console.error(error);
-
+    // Очікувані помилки (немає прав, не знайдено) — не друкуємо стек у консоль
     if (error.status) {
         return res.status(error.status).json({
             success: false,
@@ -27,11 +26,14 @@ const sendError = (res, error) => {
     const known = PG_ERRORS[error.code];
 
     if (known) {
+        console.warn(`[DB ${error.code}] ${error.detail || error.message}`);
         return res.status(known[0]).json({
             success: false,
             message: known[1]
         });
     }
+
+    console.error(error);
 
     return res.status(500).json({
         success: false,

@@ -16,7 +16,7 @@ import {
 } from "../../services/homeworkSubmissionService";
 import { uploadHomeworkFile } from "../../services/uploadService";
 import { AuthContext } from "../../context/AuthContext";
-import { canManageAcademics, isStudent } from "../../utils/permissions";
+import { canManageAcademics, editableSubjects, isStudent } from "../../utils/permissions";
 import { getPhotoUrl } from "../../utils/photoUrl";
 import { getClasses } from "../../services/classService";
 import { getSubjects } from "../../services/subjectService";
@@ -713,7 +713,7 @@ function Homework() {
                                     onChange={handleChange}
                                 >
                                     <option value="">Оберіть предмет</option>
-                                    {subjects.map((s) => (
+                                    {editableSubjects(subjects, user).map((s) => (
                                         <option key={s.id} value={s.id}>
                                             {s.name}
                                         </option>
